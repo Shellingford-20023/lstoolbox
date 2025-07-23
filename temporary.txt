@@ -1,0 +1,103 @@
+import numpy as np
+from scipy.integrate import cumulative_trapezoid
+
+dt = 0.5 # in unit of μs
+phi0 = 0 # temporary
+class Shapes:
+    def __init__(self, tstart, tend, tp, freq, phi0, shape = 'rectangular', FM = 'linear', **kwargs):
+        # self._repr = func.__doc__
+        # self.func = func
+        # self.__name__ = func.__name__
+        # self.__doc__ = func.__doc__
+
+        self.tstart = tstart
+        self.tend = tend
+        self.tp = tp
+        self.dt = dt
+        self.freq = freq
+        self.phi0 = phi0
+        self.t = np.arange(0, tp+dt, dt)
+        self.ti = self.t - self.tp/2 
+        self.shape= shape
+        self.FM = FM
+        self.tfwhm = kwargs.get('tfwhm', 1)
+        self.trunc = kwargs.get('trunc', 1)
+        self.beta = kwargs.get('beta', 1)
+        self.nwurst = kwargs.get('nwurst', 1)
+        self.zerocross = kwargs.get('zerocross', 0.1)
+
+        self.modamp = {}
+        self.modfreq = {}
+        self.modphase = {}
+
+        if not hasattr(self, 'FM'):
+            self.FM = "linear"
+
+        if len(self.freq) == 1 and self.freq != 0 :
+            print('Must input two values for a valid range of frequency sweet!')
+        elif self.freq != 0: 
+            BW = 0
+        else: 
+            BW = self.freq[-1] - self.freq[0]
+
+        self.BW = BW
+
+        match self.FM:
+            case "sech/tanh":
+                BW_ = np.abs(np.max(self.BW) - np.min(self.BW))/np.tanh(self.beta/2)
+                modfreq = (BW_/2)*np.tanh((self.beta/self.tp)*self.ti)
+                modphase = 2*np.pi*(self.BW/2)*(self.tp/self.beta)*np.log(np.cosh((self.beta/self.tp)*self.ti))
+                self.BW = BW_
+
+            case "linear":
+                k = self.BW/self.tp
+                modfreq = k*self.ti
+                modphase = 2*np.pi*((k/2)*self.ti**2)
+        
+        self.modfreq = modfreq
+        self.modphase = modphase
+
+        # else:
+        #     # self.FM = 'linear'
+        #     # Default to linear chirp
+        #     k = self.BW/self.tp
+        #     modfreq = k*self.ti
+        #     modphase = 2*np.pi*((k/2)*self.ti**2)
+
+            # case "uniformQ":
+
+        match self.shape:
+            case "rectangular":
+                A0 = np.ones(len(self.t))
+        
+            case "gaussian":
+                if not hasattr(self, 'tfwhm'):
+                    if not hasattr(self, 'trunc'):
+                        raise AttributeError('Object must have wither `tfwhm` or `trunc` defined')
+                    else:
+                        self.tfwhm = np.sqrt(-(self.t**2)/np.log2(self.trunc))
+        
+                sigma = self.tfwhm/2*np.sqrt(2*np.log(2))
+                A0 = 1/(sigma*np.sqrt(2*np.pi))*np.exp(-0.5*(self.t-self.tp/2)**2/sigma**2)
+
+            case "sinc":
+                x_ = 2*np.pi*ti/self.zerocross
+                A0 = np.sin(x_)/x_
+                A0[np.isnan(A0)] = 1
+
+            case "WURST":
+                A0 = 1 - np.abs(np.sin(np.pi*self.ti/self.tp))**self.nwurst
+
+            case "sech/tanh":
+                A0 = 1/(np.cosh(self.beta*self.ti/self.tp))
+            # A0 = self.flip/(2*np.pi*cumulative_trapezoid(A0))
+            
+        self.modamp = A0
+        
+        self.totalphase = self.modphase + 2*np.pi*np.mean(self.BW)*self.t + self.phi0
+        self.IQ = self.modamp*np.exp(1j*self.totalphase)
+
+        def Delay(self):
+            npts = (self.end - self.start)/self.dt+1
+            d = np.arange(0, dt*npts, dt)
+            return d

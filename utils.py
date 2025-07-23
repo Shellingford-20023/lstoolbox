@@ -15,11 +15,9 @@ def nextpow2(x):
 def tohalf(x):
     return math.floor(x * 2) / 2
 
-def fdaxis(dt, zf = 2**10):
-    zf = 2**16
-    # gx = (np.fft.fftshift(np.fft.fft(vt, zf)))
+def fdaxis(dt, npts):
     nyquistfreq = 1/(2*dt)
-    unitax = 2/zf*(np.arange(0,zf,1) - np.round(zf/2))
+    unitax = 2/npts*(np.arange(0,npts,1) - np.round(npts/2))
     ftax = nyquistfreq*unitax
     return ftax
        
@@ -49,6 +47,43 @@ def ciqread(filename):
                         Q[n,:] = Q_[:,1] 
                         ax[n,:] = I_[:,0]
         return ax, I, Q, setting 
+
+def basecorr(data, n, dim=1, region=None):
+    """
+    Perform 1D polynomial fitting along columns (dim=1) or rows (dim=2).
+
+    Parameters:
+        data (2D np.array): The input matrix.
+        n (int): Degree of the polynomial.
+        dim (int): Dimension to fit along: 1 (columns) or 2 (rows).
+        region (1D np.array or list of indices): Optional, indices to use for fitting.
+
+    Returns:
+        baseline (2D np.array): The fitted polynomial baseline.
+    """
+    data = np.asarray(data)
+    # Transpose if we are fitting along rows
+    transpose = False
+    if dim == 2:
+        data = data.T
+        transpose = True
+    # Build design matrix D
+    x = np.linspace(-1, 1, data.shape[0])  # centered and scaled
+    D = np.column_stack([x**i for i in range(n + 1)])  # Shape: (rows, n+1)
+    # Fit polynomials
+    if region is None:
+        # Fit to all rows
+        p, _, _, _ = np.linalg.lstsq(D, data, rcond=None)  # Shape: (n+1, cols)
+    else:
+        region = np.asarray(region).flatten()
+        p, _, _, _ = np.linalg.lstsq(D[region, :], data[region, :], rcond=None)
+    # Evaluate baseline
+    baseline = D @ p  # Shape: same as data
+    # Transpose back if needed
+    if transpose:
+        baseline = baseline.T
+
+    return baseline
 
 def mypalette(color):
     match color:
