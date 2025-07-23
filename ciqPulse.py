@@ -1,4 +1,4 @@
- import numpy as np
+import numpy as np
 from scipy.integrate import cumulative_trapezoid
 from itertools import zip_longest
 
