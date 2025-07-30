@@ -88,27 +88,31 @@ def basecorr(data, n, dim=1, region=None):
 def mypalette(color):
     match color:
         case 'gray':
-            colorcode = [0.65, 0.65, 0.65]
+            rgb = [0.65, 0.65, 0.65]
         case 'red':
-            colorcode = [0.8500, 0.3250, 0.0980]
+            rgb = [0.8500, 0.3250, 0.0980]
         case 'yellow':
-            colorcode = [0.9290, 0.6940, 0.1250]
+            rgb = [0.9290, 0.6940, 0.1250]
         case 'pumpkin':
-            colorcode = [1.0000, 0.4588, 0.0941]
+            rgb = [1.0000, 0.4588, 0.0941]
         case 'pink':
-            colorcode = [1.0000, 0.7137, 0.8588]
+            rgb = [1.0000, 0.7137, 0.8588]
 
-        case 'green':
-            colorcode = [0.1333, 0.5451, 0.1333]
-        case 'teal':
-            colorcode = [0.0706, 0.7608, 0.6784]
+
         case 'ciq blue, dark':
-            colorcode = [0.1412, 0.3255, 0.6392]
+            rgb = [0.1406, 0.3242, 0.6406]
         case 'ciq blue, light':
-            colorcode = [0.0471, 0.6118, 0.8941]
+            rgb = [0.0469, 0.6094, 0.8906]
         case 'cyan':
-            colorcode = [0.0471, 0.6118, 0.8941]
+            rgb = [0.2627, 0.6980, 0.8863]
             
+
         case 'periwinkle':
-            colorcode = [0.7451, 0.5765, 0.8941]
-    return colorcode
+            rgb = [0.0586, 0.4336, 0.8633]
+        case 'green':
+            rgb = [0.1333, 0.5451, 0.1333]
+        case 'teal':
+            rgb = [0.0706, 0.7608, 0.6784] 
+        case 'lavender':
+            rgb = [0.5742, 0.6445, 0.9375]
+    return rgb
