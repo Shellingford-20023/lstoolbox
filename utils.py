@@ -98,7 +98,8 @@ def mypalette(color):
         case 'pink':
             rgb = [1.0000, 0.7137, 0.8588]
 
-
+        case 'blue':
+            rgb = [0.0586, 0.4336, 0.8633]
         case 'ciq blue, dark':
             rgb = [0.1406, 0.3242, 0.6406]
         case 'ciq blue, light':
@@ -107,8 +108,6 @@ def mypalette(color):
             rgb = [0.2627, 0.6980, 0.8863]
             
 
-        case 'periwinkle':
-            rgb = [0.0586, 0.4336, 0.8633]
         case 'green':
             rgb = [0.1333, 0.5451, 0.1333]
         case 'teal':
